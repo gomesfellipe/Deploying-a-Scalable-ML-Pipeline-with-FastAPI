@@ -1,29 +1,111 @@
-Working in a command line environment is recommended for ease of use with git and dvc. If on Windows, WSL1 or 2 is recommended.
+# Deploying a Scalable ML Pipeline with FastAPI
 
-# Environment Set up (pip or conda)
-* Option 1: use the supplied file `environment.yml` to create a new environment with conda
-* Option 2: use the supplied file `requirements.txt` to create a new environment with pip
-    
-## Repositories
-* Create a directory for the project and initialize git.
-    * As you work on the code, continually commit changes. Trained models you want to use in production must be committed to GitHub.
-* Connect your local git repo to GitHub.
-* Setup GitHub Actions on your repo. You can use one of the pre-made GitHub Actions if at a minimum it runs pytest and flake8 on push and requires both to pass without error.
-    * Make sure you set up the GitHub Action to have the same version of Python as you used in development.
+Este repositório implementa um pipeline de ML para o dataset Census Income, com treinamento, avaliação por slices e uma API FastAPI para inferência. Ele foi criado como parte de um projeto educacional e segue boas práticas de versionamento, testes e documentação.
 
-# Data
-* Download census.csv and commit it to dvc.
-* This data is messy, try to open it in pandas and see what you get.
-* To clean it, use your favorite text editor to remove all spaces.
+## Visão geral
 
-# Model
-* Using the starter code, write a machine learning model that trains on the clean data and saves the model. Complete any function that has been started.
-* Write unit tests for at least 3 functions in the model code.
-* Write a function that outputs the performance of the model on slices of the data.
-    * Suggestion: for simplicity, the function can just output the performance on slices of just the categorical features.
-* Write a model card using the provided template.
+- **Treinamento e avaliação** com dados tabulares limpos (`data/census.csv`).
+- **Avaliação por slices** para detectar viés e performance por categoria.
+- **API FastAPI** com endpoints GET e POST para inferência.
+- **Model card** documentando uso e limitações.
 
-# API Creation
-*  Create a RESTful API using FastAPI this must implement:
-    * GET on the root giving a welcome message.
-    * POST that does model inference. 
+## Estrutura do projeto
+
+- `data/` — dataset (inclui `census.csv`).
+- `ml/` — pipeline de dados e modelo.
+- `model/` — artefatos treinados (`model.pkl`, `encoder.pkl`).
+- `main.py` — aplicação FastAPI.
+- `train_model.py` — script de treino.
+- `test_ml.py` — testes de unidade.
+- `model_card.md` — documentação do modelo.
+
+## Pré-requisitos
+
+- Python 3.10+ (ou a versão configurada no seu ambiente).
+- Git instalado.
+- (Opcional) DVC para versionamento do dataset.
+
+> Em Windows, usar WSL 1/2 facilita integrações com Git/DVC, mas não é obrigatório.
+
+## Configuração do ambiente
+
+Escolha **uma** das opções abaixo:
+
+### Opção 1 — Conda
+
+```bash
+conda env create -f environment.yml
+conda activate fastapi
+```
+
+### Opção 2 — Pip
+
+```bash
+python -m venv .venv
+.
+```
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+## Treinamento e testes
+
+### Treinar o modelo
+
+```bash
+python train_model.py
+```
+
+### Rodar testes
+
+```bash
+pytest -q
+```
+
+## API FastAPI
+
+### Subir a aplicação
+
+```bash
+uvicorn main:app --host 127.0.0.1 --port 8000
+```
+
+### Endpoints
+
+- **GET /** — mensagem de boas-vindas
+- **POST /data/** — inferência com payload JSON
+
+### Exemplo de request (POST)
+
+```json
+{
+  "age": 37,
+  "workclass": "Private",
+  "fnlgt": 178356,
+  "education": "HS-grad",
+  "education-num": 10,
+  "marital-status": "Married-civ-spouse",
+  "occupation": "Prof-specialty",
+  "relationship": "Husband",
+  "race": "White",
+  "sex": "Male",
+  "capital-gain": 0,
+  "capital-loss": 0,
+  "hours-per-week": 40,
+  "native-country": "United-States"
+}
+```
+
+> A documentação interativa fica em: `http://127.0.0.1:8000/docs`.
+
+## Boas práticas recomendadas
+
+- Commits frequentes com mensagens claras.
+- Versões do modelo versionadas em Git.
+- Pipeline de CI rodando **pytest** + **flake8**.
+- Atualizar `model_card.md` sempre que o modelo mudar.
+
+## Observações
+
+Este projeto foi estruturado para fins educacionais e pode ser adaptado para produção com melhorias de segurança, monitoramento e versionamento de features.
